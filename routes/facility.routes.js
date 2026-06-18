@@ -14,13 +14,26 @@ router.get("/", async (req, res) => {
     }
 
     if (type) {
-      query.facility_type = { $in: [type] };
+      query.facility_type = type;
     }
 
     const facilities = await Facility.find(query);
     res.json(facilities);
   } catch (error) {
-    res.status(500).json({ message: "Server Error!", error });
+    console.error("Get Facilities Error:", error.message);
+    res.status(500).json({ message: error.message || "Server Error!" });
+  }
+});
+
+// ⚠️ IMPORTANT: /owner/:email MUST come before /:id to avoid route conflict
+// Get My Facilities by owner email (Private)
+router.get("/owner/:email", verifyToken, async (req, res) => {
+  try {
+    const facilities = await Facility.find({ owner_email: req.params.email });
+    res.json(facilities);
+  } catch (error) {
+    console.error("Get Owner Facilities Error:", error.message);
+    res.status(500).json({ message: error.message || "Server Error!" });
   }
 });
 
@@ -33,7 +46,8 @@ router.get("/:id", async (req, res) => {
     }
     res.json(facility);
   } catch (error) {
-    res.status(500).json({ message: "Server Error!", error });
+    console.error("Get Single Facility Error:", error.message);
+    res.status(500).json({ message: error.message || "Server Error!" });
   }
 });
 
@@ -44,7 +58,11 @@ router.post("/", verifyToken, async (req, res) => {
     const result = await facility.save();
     res.status(201).json(result);
   } catch (error) {
-    res.status(500).json({ message: "Server Error!", error });
+    console.error("Add Facility Error:", error.message);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
+    res.status(500).json({ message: error.message || "Server Error!" });
   }
 });
 
@@ -54,14 +72,18 @@ router.put("/:id", verifyToken, async (req, res) => {
     const facility = await Facility.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true }
+      { new: true, runValidators: true }
     );
     if (!facility) {
       return res.status(404).json({ message: "Facility Not Found!" });
     }
     res.json(facility);
   } catch (error) {
-    res.status(500).json({ message: "Server Error!", error });
+    console.error("Update Facility Error:", error.message);
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
+    res.status(500).json({ message: error.message || "Server Error!" });
   }
 });
 
@@ -74,19 +96,8 @@ router.delete("/:id", verifyToken, async (req, res) => {
     }
     res.json({ message: "Facility Deleted Successfully!" });
   } catch (error) {
-    res.status(500).json({ message: "Server Error!", error });
-  }
-});
-
-// Get My Facilities (Private)
-router.get("/owner/:email", verifyToken, async (req, res) => {
-  try {
-    const facilities = await Facility.find({
-      owner_email: req.params.email,
-    });
-    res.json(facilities);
-  } catch (error) {
-    res.status(500).json({ message: "Server Error!", error });
+    console.error("Delete Facility Error:", error.message);
+    res.status(500).json({ message: error.message || "Server Error!" });
   }
 });
 
