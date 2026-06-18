@@ -1,7 +1,15 @@
 const jwt = require("jsonwebtoken");
 
 const verifyToken = (req, res, next) => {
-  const token = req.cookies?.token;
+  // Check Authorization header first, then cookie as fallback
+  let token = null;
+
+  const authHeader = req.headers["authorization"];
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else {
+    token = req.cookies?.token;
+  }
 
   if (!token) {
     return res.status(401).json({ message: "Unauthorized Access!" });
