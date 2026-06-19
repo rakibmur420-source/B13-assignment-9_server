@@ -87,7 +87,7 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// Delete Facility (Private)
+// Delete Facility (Private) jcnec
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const facility = await Facility.findByIdAndDelete(req.params.id);
