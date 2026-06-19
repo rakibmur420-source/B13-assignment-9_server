@@ -2,8 +2,6 @@
 
 A RESTful backend API for SportNest, a full-stack sports facility booking platform. Built with Express.js and MongoDB, it handles user authentication, facility CRUD operations, and booking management for the SportNest client application.
 
-**Live API link:**
-https://sportnest-server-ml18.onrender.com/api
 
 **Client live link:**
 https://lighthearted-kheer-7787fd.netlify.app
